@@ -3,7 +3,7 @@
 - name: playbook deploy jboss standalone
   hosts: web
   tasks:
-    - name: set slave identity
+    - name: set slave
       lineinfile:
         path: "/home/vagrant/roles/jboss-domain/templates/host-slave.xml"
         backrefs: yes
