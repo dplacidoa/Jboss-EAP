@@ -1,0 +1,73 @@
+---
+# tasks file for jboss-standalone
+
+#Create user of S.O.
+- name: create user
+  user:
+    name: jbosseap
+    uid: 4000
+    state: present
+#Installer packages
+- name: install unzip
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - unzip
+    - java  
+#Copy installer and unpack
+- name: copy and unpack
+  unarchive:
+    src: "{{ jboss_eap_installer }}"
+    dest: /home/jbosseap/
+    owner: "{{ jboss_eap_user }}"
+    group: "{{ jboss_eap_group }}"
+#Create user jboss web console
+- name: Create default JBoss admin user
+  command: "{{ jboss_eap_jboss_home }}/bin/add-user.sh -s -r ManagementRealm -u {{ jboss_eap_admin_user }} -p {{ jboss_eap_admin_password }}"
+#Create directory to pid jboss
+- name: Create directory /var/run/
+  file:
+    path: "{{ jboss_eap_run }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ jboss_eap_user }}"
+    group: "{{ jboss_eap_group }}"
+#Copy file standalone-full.xml
+- name: Copy configuration file standalone-full.xml
+  template:
+    src: templates/standalone-full.xml
+    dest: "{{ jboss_eap_jboss_config}}"
+#Copy file standalone with parameters of memory
+- name: Copy configuration file standalone
+  template:
+    src: templates/standalone.conf
+    dest: "{{ jboss_eap_jboss_home }}/bin/"
+#Copy configuration file to jboss as a service
+- name: Copy configuration file boot jboss
+  template:
+    src: templates/jboss-eap.conf
+    dest: /etc/default/
+#Copy script to jboss as a service
+- name: Copy boot script
+  template:
+    src: templates/jboss-eap-rhel.sh
+    dest: /etc/init.d/
+#Comands to start JbossEAP
+- name: Start JbossEAP
+  command: "{{ item }}"
+  args:
+    chdir: $path 
+  environment:
+    path: /etc/init.d/
+    script: jboss-eap-rhel.sh
+  loop:
+    - chmod +x $script
+    - chkconfig jboss-eap-rhel.sh on # Agregar servicio desde el arranque
+    - systemctl start jboss-eap-rhel # Iniciar Jboss EAP
+    - netstat -tnlp
+  register: command_output
+#Print output of command
+- name: print output
+  debug: 
+    var=command_output

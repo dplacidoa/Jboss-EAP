@@ -1,0 +1,79 @@
+---
+# tasks file for jboss-domain
+#Create user of S.O.
+- name: create user
+  user:
+    name: jbosseap
+    uid: 4000
+    state: present
+#Installer packages
+- name: install unzip
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - vim
+    - unzip
+    - java 
+    - vim 
+#valite exist path
+#- name: validate path jboss
+#  stat: 
+#    path: "{{ jboss_eap_jboss_home }}"
+#  register: jboss_home
+#Copy installer and unpack
+- name: copy and unpack
+  unarchive:
+    src: "{{ jboss_eap_installer }}"
+    dest: /home/jbosseap/
+    owner: "{{ jboss_eap_user }}"
+    group: "{{ jboss_eap_group }}"
+  #when: jboss_home.stat is not defined
+#Create user jboss admin web console
+- name: Create default JBoss admin user
+  command: "{{ jboss_eap_jboss_home }}/bin/add-user.sh -s -r ManagementRealm -u {{ jboss_eap_admin_user }} -p {{ jboss_eap_admin_password }}"
+#Create user for host controller connect to domain controller
+- name: Create default JBoss admin user
+  command: "{{ jboss_eap_jboss_home }}/bin/add-user.sh -s -r ManagementRealm -u {{ jboss_eap_hc1_user }} -p {{ jboss_eap_hc1_password }}"
+#Include domain controller dc.yml
+- name: Include create domain controller and host controller 1
+  include: "{{ item }}"
+  with_items:
+    - dc.yml
+    - hc1.yml
+#Comands to start JbossEAP DC
+- name: Start JbossEAP DC
+  command: "{{ item }}"
+  args:
+    chdir: $path 
+  environment:
+    path: /etc/init.d/
+    script: jbossDC
+  loop:
+    - chmod +x $script
+    - chkconfig $script on # Agregar servicio desde el arranque
+    - systemctl start $script # Iniciar Jboss EAP
+    - netstat -tnlp
+  register: command_outputDC
+#Print output of command
+- name: print outputDC
+  debug: 
+    var=command_outputDC
+#Comands to start JbossEAP HC1
+- name: Start JbossEAP HC
+  command: "{{ item }}"
+  args:
+    chdir: $path 
+  environment:
+    path: /etc/init.d/
+    script: jbossHC
+  loop:
+    - chmod +x $script
+    - chkconfig $script on # Agregar servicio desde el arranque
+    - systemctl start $script # Iniciar Jboss EAP
+    - netstat -tnlp
+  register: command_outputHC1
+#Print output of command
+- name: print outputHC1
+  debug: 
+    var=command_outputHC1

@@ -1,0 +1,32 @@
+---
+#Create directory to pid jboss DC
+- name: Create directory /var/run/jboss-dc/
+  file:
+    path: "{{ jboss_eap_run_dc }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ jboss_eap_user }}"
+    group: "{{ jboss_eap_group }}"
+#Create directory to log jboss DC
+- name: Create directory /var/log/jboss-dc/
+  file:
+    path: "{{ jboss_eap_log_dc }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ jboss_eap_user }}"
+    group: "{{ jboss_eap_group }}"
+#Create Domain Controller
+- name: Clon directory domain to hc1
+  command: "{{ item }}"
+  loop:
+    - cp -pr "{{ jboss_eap_jboss_home }}"/domain "{{ jboss_eap_jboss_home }}"/dcontroller
+#Copy script to jboss as a service
+- name: Copy boot script
+  template:
+    src: templates/jbossDC
+    dest: /etc/init.d/
+#Copy configuration file to jboss as a service
+- name: Copy configuration file boot jboss
+  template:
+    src: templates/jboss-eap.dc.conf
+    dest: /etc/default/

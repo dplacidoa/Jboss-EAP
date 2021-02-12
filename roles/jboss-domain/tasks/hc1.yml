@@ -1,0 +1,52 @@
+---
+#Create directory to pid jboss HC1
+- name: Create directory /var/run/jboss-hc/
+  file:
+    path: "{{ jboss_eap_run_hc }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ jboss_eap_user }}"
+    group: "{{ jboss_eap_group }}"
+#Create directory to log jboss HC1
+- name: Create directory /var/log/jboss-hc/
+  file:
+    path: "{{ jboss_eap_log_hc }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ jboss_eap_user }}"
+    group: "{{ jboss_eap_group }}"
+#Create Host Controller 1
+- name: Clon directory domain to hc1 and backup host-slave.xml
+  command: "{{ item }}"
+  loop:
+    - cp -pr "{{ jboss_eap_jboss_home }}"/domain "{{ jboss_eap_jboss_home }}"/hcontroller
+    - cp -pr "{{ jboss_eap_jboss_home }}"/hcontroller/configuration/host-slave.xml "{{ jboss_eap_jboss_home }}"/hcontroller/configuration/host-slave.xml.bk
+#Configure host-slave.xml
+- name: Reeplace secret value in host-slave.xml
+  lineinfile:
+    path: "{{ jboss_eap_jboss_home }}/hcontroller/configuration/host-slave.xml"
+    backrefs: yes
+    regexp: '^c2xhdmVfdXMzcl9wYXNzd29yZA=='
+    line: 'aGMxdG9kb21haW4hCg=='
+- name: Reeplace name host1 in host-slave.xml
+  lineinfile:
+    path: "{{ jboss_eap_jboss_home }}/hcontroller/configuration/host-slave.xml"
+    backrefs: yes
+    regexp: '^<host xmlns="urn:jboss:domain:11.0">'
+    line: '<host name=host1 xmlns="urn:jboss:domain:11.0">'
+- name: Reeplace username in host-slave.xml
+  lineinfile:
+    path: "{{ jboss_eap_jboss_home }}/hcontroller/configuration/host-slave.xml"
+    backrefs: yes
+    regexp: '^<remote security-realm="ManagementRealm">'
+    line: '<remote security-realm="ManagementRealm" username="hc1User">'
+#Copy script to jboss as a service
+- name: Copy boot script
+  template:
+    src: templates/jbossHC
+    dest: /etc/init.d/
+#Copy configuration file to jboss as a service
+- name: Copy configuration file boot jboss
+  template:
+    src: templates/jboss-eap.hc.conf
+    dest: /etc/default/

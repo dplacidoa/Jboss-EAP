@@ -1,0 +1,11 @@
+---
+# vars file for jboss-standalone
+jboss_eap_installer : /home/vagrant/jboss-eap-7.3.0.zip
+jboss_eap_jboss_home: "/home/jbosseap/jboss-eap-{{ jboss_eap_base_version }}"
+jboss_eap_jboss_config: "/home/jbosseap/jboss-eap-{{ jboss_eap_base_version }}/standalone/configuration/"
+jboss_eap_base_version: 7.3
+jboss_eap_user: jbosseap
+jboss_eap_group: jbosseap
+jboss_eap_admin_user: adminUser
+jboss_eap_admin_password: Password1!
+jboss_eap_run: /var/run/jboss-eap/

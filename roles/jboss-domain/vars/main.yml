@@ -1,0 +1,24 @@
+---
+# vars file for jboss-domain
+jboss_eap_installer : /home/vagrant/jboss-eap-7.3.0.zip
+jboss_eap_jboss_home: "/home/jbosseap/jboss-eap-{{ jboss_eap_base_version }}"
+jboss_eap_jboss_config: "/home/jbosseap/jboss-eap-{{ jboss_eap_base_version }}/standalone/configuration/"
+jboss_eap_base_version: 7.3
+# User admin Jboss
+jboss_eap_user: jbosseap
+jboss_eap_group: jbosseap
+jboss_eap_admin_user: adminUser
+jboss_eap_admin_password: Password1!
+# path pid dc
+jboss_eap_run_dc: /var/run/jboss-dc/
+# path pid hc
+jboss_eap_run_hc: /var/run/jboss-hc/
+# path log dc
+jboss_eap_log_dc: /var/log/jboss-dc/
+# path log hc
+jboss_eap_log_hc: /var/log/jboss-hc/
+# User to connect hc with dc
+jboss_eap_hc1_user: hc1User
+jboss_eap_hc1_password: hc1todomain!
+jboss_eap_hc2_user: hc2User
+jboss_eap_hc2_password: hc2todomain!

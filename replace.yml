@@ -1,0 +1,11 @@
+
+---
+- name: playbook deploy jboss standalone
+  hosts: web
+  tasks:
+    - name: set slave identity
+      lineinfile:
+        path: "/home/vagrant/roles/jboss-domain/templates/host-slave.xml"
+        backrefs: yes
+        regexp: '^c2xhdmVfdXMzcl9wYXNzd29yZA=='
+        line: 'hc1todomain! | b64encode'
